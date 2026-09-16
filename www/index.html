@@ -4,290 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#040718">
-  <title>Runner 3D</title>
+  <title>Runner 3D Pro</title>
 
   <style>
-    /* Aapka original CSS UI bilkul waise hi rakha gaya hai */
-    :root {
-      --cyan: #00eaff;
-      --blue: #176bff;
-      --purple: #a826ff;
-      --orange: #ff9500;
-      --dark: #030615;
-    }
+    /* --- AAPKA ORIGINAL AUR NAYA CSS --- */
+    :root { --cyan: #00eaff; --blue: #176bff; --purple: #a826ff; --orange: #ff9500; --dark: #030615; }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--dark); color: white; font-family: Arial, Helvetica, sans-serif; touch-action: none; }
+    #game { position: relative; width: 100%; height: 100%; overflow: hidden; background: #040718; }
+    #canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+    
+    /* HUD */
+    #hud { position: absolute; z-index: 5; top: max(14px, env(safe-area-inset-top)); left: 14px; right: 14px; display: flex; justify-content: space-between; pointer-events: none; }
+    .hud-left { display: flex; gap: 8px; }
+    .hud-box { min-width: 78px; padding: 8px 11px; border: 1px solid rgba(0, 234, 255, 0.65); border-radius: 14px; background: rgba(2, 7, 25, 0.78); box-shadow: 0 0 15px rgba(0, 234, 255, 0.2); text-align: center; }
+    .hud-label { color: #9beeff; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+    .hud-value { margin-top: 2px; font-size: 19px; font-weight: 900; }
+    #pauseButton { width: 46px; height: 46px; border: 1px solid var(--cyan); border-radius: 50%; background: rgba(3, 8, 30, 0.85); color: white; font-size: 18px; pointer-events: auto; }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+    /* Screens */
+    .screen { position: absolute; z-index: 20; inset: 0; display: flex; align-items: center; justify-content: center; padding: 18px; background: radial-gradient(circle at 50% 30%, rgba(23, 107, 255, 0.3), transparent 45%), rgba(1, 3, 14, 0.8); backdrop-filter: blur(7px); }
+    .panel { width: min(92vw, 430px); max-height: 94vh; overflow: auto; padding: 19px; border: 2px solid rgba(0, 234, 255, 0.8); border-radius: 28px; background: linear-gradient(150deg, rgba(8, 18, 51, 0.97), rgba(7, 4, 30, 0.97)); box-shadow: 0 0 30px rgba(0, 234, 255, 0.28), 0 0 60px rgba(168, 38, 255, 0.18); text-align: center; }
+    
+    h1 { font-size: clamp(38px, 10vw, 58px); line-height: 1; letter-spacing: 4px; text-transform: uppercase; background: linear-gradient(90deg, var(--cyan), white, var(--purple)); -webkit-background-clip: text; color: transparent; filter: drop-shadow(0 0 9px rgba(0, 234, 255, 0.65)); }
+    h2 { margin-bottom: 10px; color: var(--cyan); font-size: 31px; }
+    .tagline { margin: 9px 0 14px; color: #b7c7ff; font-size: 14px; letter-spacing: 1.5px; }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--dark);
-      color: white;
-      font-family: Arial, Helvetica, sans-serif;
-      touch-action: none;
-    }
+    /* Buttons */
+    .primary-button { width: 100%; min-height: 55px; margin-top: 8px; border: 0; border-radius: 17px; background: linear-gradient(90deg, #00d8ff, #2367ff, #aa25ff); box-shadow: 0 7px 0 #071e7a, 0 0 20px rgba(0, 216, 255, 0.45); color: white; font-size: 19px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px;}
+    .primary-button:active { transform: translateY(5px); box-shadow: 0 2px 0 #071e7a, 0 0 14px rgba(0, 216, 255, 0.4); }
+    .secondary-button { width: 100%; min-height: 45px; margin-top: 8px; border: 2px solid var(--cyan); border-radius: 12px; background: transparent; color: white; font-size: 16px; font-weight: bold; text-transform: uppercase; }
+    .ad-button { width: 100%; min-height: 55px; margin-top: 8px; margin-bottom:15px; border: 2px solid #00ff88; border-radius: 17px; background: rgba(0, 255, 136, 0.1); color: #00ff88; font-size: 17px; font-weight: bold; text-transform: uppercase; }
 
-    #game {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #040718;
-    }
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+    
+    .results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 17px 0; }
+    .result-box { padding: 13px 7px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); }
+    .result-box strong { display: block; color: var(--cyan); font-size: 25px; }
+    .result-box span { color: #aab8e5; font-size: 11px; text-transform: uppercase; }
 
-    #canvas {
-      position: absolute;
-      inset: 0;
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    #hud {
-      position: absolute;
-      z-index: 5;
-      top: max(14px, env(safe-area-inset-top));
-      left: 14px;
-      right: 14px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-
-    .hud-left {
-      display: flex;
-      gap: 8px;
-    }
-
-    .hud-box {
-      min-width: 78px;
-      padding: 8px 11px;
-      border: 1px solid rgba(0, 234, 255, 0.65);
-      border-radius: 14px;
-      background: rgba(2, 7, 25, 0.78);
-      box-shadow: 0 0 15px rgba(0, 234, 255, 0.2);
-      text-align: center;
-    }
-
-    .hud-label {
-      color: #9beeff;
-      font-size: 10px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .hud-value {
-      margin-top: 2px;
-      font-size: 19px;
-      font-weight: 900;
-    }
-
-    #pauseButton {
-      width: 46px;
-      height: 46px;
-      border: 1px solid var(--cyan);
-      border-radius: 50%;
-      background: rgba(3, 8, 30, 0.85);
-      color: white;
-      font-size: 18px;
-      pointer-events: auto;
-    }
-
-    .screen {
-      position: absolute;
-      z-index: 20;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: radial-gradient(circle at 50% 30%, rgba(23, 107, 255, 0.3), transparent 45%), rgba(1, 3, 14, 0.8);
-      backdrop-filter: blur(7px);
-    }
-
-    .panel {
-      width: min(92vw, 430px);
-      max-height: 94vh;
-      overflow: auto;
-      padding: 19px;
-      border: 2px solid rgba(0, 234, 255, 0.8);
-      border-radius: 28px;
-      background: linear-gradient(150deg, rgba(8, 18, 51, 0.97), rgba(7, 4, 30, 0.97));
-      box-shadow: 0 0 30px rgba(0, 234, 255, 0.28), 0 0 60px rgba(168, 38, 255, 0.18);
-      text-align: center;
-    }
-
-    .cover-box {
-      position: relative;
-      width: min(62vw, 245px);
-      aspect-ratio: 1;
-      margin: 0 auto 15px;
-      overflow: hidden;
-      border: 3px solid var(--cyan);
-      border-radius: 25%;
-      background: radial-gradient(circle, #174d9f, #0a0d29 70%);
-      box-shadow: 0 0 18px var(--cyan), 0 0 35px rgba(168, 38, 255, 0.7);
-    }
-
-    .cover-box::before {
-      content: "🏃";
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      font-size: 90px;
-    }
-
-    .cover {
-      position: relative;
-      z-index: 2;
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    h1 {
-      font-size: clamp(38px, 10vw, 58px);
-      line-height: 1;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      background: linear-gradient(90deg, var(--cyan), white, var(--purple));
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      filter: drop-shadow(0 0 9px rgba(0, 234, 255, 0.65));
-    }
-
-    h2 {
-      margin-bottom: 10px;
-      color: var(--cyan);
-      font-size: 31px;
-    }
-
-    .tagline {
-      margin: 9px 0 14px;
-      color: #b7c7ff;
-      font-size: 14px;
-      letter-spacing: 1.5px;
-    }
-
-    .instructions {
-      margin: 13px 0;
-      padding: 12px;
-      border-radius: 15px;
-      background: rgba(255, 255, 255, 0.055);
-      color: #d8e3ff;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .primary-button {
-      width: 100%;
-      min-height: 55px;
-      margin-top: 8px;
-      border: 0;
-      border-radius: 17px;
-      background: linear-gradient(90deg, #00d8ff, #2367ff, #aa25ff);
-      box-shadow: 0 7px 0 #071e7a, 0 0 20px rgba(0, 216, 255, 0.45);
-      color: white;
-      font-size: 19px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .primary-button:active {
-      transform: translateY(5px);
-      box-shadow: 0 2px 0 #071e7a, 0 0 14px rgba(0, 216, 255, 0.4);
-    }
-
-    .results {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin: 17px 0;
-    }
-
-    .result-box {
-      padding: 13px 7px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .result-box strong {
-      display: block;
-      color: var(--cyan);
-      font-size: 25px;
-    }
-
-    .result-box span {
-      color: #aab8e5;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-
-    #controls {
-      position: absolute;
-      z-index: 8;
-      left: 0;
-      right: 0;
-      bottom: max(18px, env(safe-area-inset-bottom));
-      display: flex;
-      justify-content: center;
-      gap: min(6vw, 25px);
-      padding: 0 16px;
-      pointer-events: none;
-    }
-
-    .control {
-      width: min(20vw, 78px);
-      height: min(20vw, 78px);
-      border: 2px solid var(--cyan);
-      border-radius: 50%;
-      background: rgba(4, 13, 43, 0.82);
-      box-shadow: 0 0 18px rgba(0, 234, 255, 0.35), inset 0 0 18px rgba(68, 32, 255, 0.3);
-      color: white;
-      font-size: 29px;
-      font-weight: bold;
-      pointer-events: auto;
-    }
-
-    .control:active {
-      transform: scale(0.9);
-      background: rgba(25, 104, 255, 0.85);
-    }
-
-    #jumpButton {
-      border-color: var(--orange);
-      box-shadow: 0 0 18px rgba(255, 149, 0, 0.45), inset 0 0 18px rgba(255, 60, 0, 0.25);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    @media (min-width: 750px) {
-      #game {
-        width: min(100%, 520px);
-        margin: auto;
-        box-shadow: 0 0 70px rgba(0, 234, 255, 0.2);
-      }
-      body {
-        background: radial-gradient(circle, #101f55, #01030c 70%);
-      }
-    }
+    /* Controls */
+    #controls { position: absolute; z-index: 8; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: min(6vw, 25px); padding: 0 16px; pointer-events: none; }
+    .control { width: min(20vw, 78px); height: min(20vw, 78px); border: 2px solid var(--cyan); border-radius: 50%; background: rgba(4, 13, 43, 0.82); box-shadow: 0 0 18px rgba(0, 234, 255, 0.35); color: white; font-size: 29px; font-weight: bold; pointer-events: auto; }
+    .control:active { transform: scale(0.9); background: rgba(25, 104, 255, 0.85); }
+    .hidden { display: none !important; }
   </style>
 
-  <!-- 3D Engines ko yahan load kiya gaya hai -->
+  <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
@@ -296,51 +59,46 @@
   <main id="game">
     <canvas id="canvas"></canvas>
 
-    <!-- UI Elements -->
+    <!-- HUD -->
     <div id="hud" class="hidden">
       <div class="hud-left">
-        <div class="hud-box">
-          <div class="hud-label">Score</div>
-          <div id="score" class="hud-value">0</div>
-        </div>
-        <div class="hud-box">
-          <div class="hud-label">Coins</div>
-          <div id="coins" class="hud-value">0</div>
-        </div>
+        <div class="hud-box"><div class="hud-label">Score</div><div id="score" class="hud-value">0</div></div>
+        <div class="hud-box"><div class="hud-label">Coins</div><div id="coins" class="hud-value">0</div></div>
       </div>
       <button id="pauseButton" aria-label="Pause game">Ⅱ</button>
     </div>
 
+    <!-- Mobile Controls -->
     <div id="controls" class="hidden">
-      <button id="leftButton" class="control" aria-label="Move left">←</button>
-      <button id="jumpButton" class="control" aria-label="Jump">↑</button>
-      <button id="rightButton" class="control" aria-label="Move right">→</button>
+      <button id="leftButton" class="control">←</button>
+      <button id="jumpButton" class="control">↑</button>
+      <button id="rightButton" class="control">→</button>
     </div>
 
+    <!-- HOME SCREEN -->
     <section id="menuScreen" class="screen">
       <div class="panel">
-        <div class="cover-box">
-          <img class="cover" src="runner-cover.png" alt="Runner game cover" onerror="this.style.display='none'">
-        </div>
-        <h1>Runner</h1>
-        <p class="tagline">RUN • DODGE • SURVIVE</p>
-        <div class="instructions">
-          Left aur right button se lane badlein.<br>
-          Jump karke obstacles se bachein.<br>
-          Coins collect karke high score banayein.
-        </div>
+        <h1>Runner 3D</h1>
+        <p class="tagline">ULTIMATE RUN</p>
         <button id="playButton" class="primary-button">Play Game</button>
+        <div class="menu-grid">
+          <button id="storeBtn" class="secondary-button">🛒 Store</button>
+          <button id="profileBtn" class="secondary-button">👤 Profile</button>
+          <button id="settingsBtn" class="secondary-button" style="grid-column: span 2;">⚙️ Settings</button>
+        </div>
       </div>
     </section>
 
+    <!-- PAUSE SCREEN -->
     <section id="pauseScreen" class="screen hidden">
       <div class="panel">
         <h2>Paused</h2>
-        <p class="tagline">Your run is waiting</p>
         <button id="resumeButton" class="primary-button">Resume</button>
+        <button id="pauseHomeButton" class="secondary-button">🏠 Home</button>
       </div>
     </section>
 
+    <!-- GAME OVER SCREEN -->
     <section id="gameOverScreen" class="screen hidden">
       <div class="panel">
         <h2>Run Over!</h2>
@@ -350,7 +108,36 @@
           <div class="result-box"><strong id="finalCoins">0</strong><span>Coins</span></div>
           <div class="result-box"><strong id="finalSpeed">1.0x</strong><span>Speed</span></div>
         </div>
-        <button id="restartButton" class="primary-button">Run Again</button>
+        <button id="reviveButton" class="ad-button">📺 Watch Ad to Revive</button>
+        <button id="restartButton" class="primary-button">New Game</button>
+        <button id="gameOverHomeButton" class="secondary-button">🏠 Home</button>
+      </div>
+    </section>
+
+    <!-- STORE SCREEN -->
+    <section id="storeScreen" class="screen hidden">
+      <div class="panel">
+        <h2>Store</h2>
+        <p class="tagline">Skins coming soon...</p>
+        <button class="backHomeBtn primary-button">Back to Home</button>
+      </div>
+    </section>
+
+    <!-- PROFILE SCREEN -->
+    <section id="profileScreen" class="screen hidden">
+      <div class="panel">
+        <h2>Profile</h2>
+        <p class="tagline">Player stats coming soon...</p>
+        <button class="backHomeBtn primary-button">Back to Home</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS SCREEN -->
+    <section id="settingsScreen" class="screen hidden">
+      <div class="panel">
+        <h2>Settings</h2>
+        <p class="tagline">Audio & Controls...</p>
+        <button class="backHomeBtn primary-button">Back to Home</button>
       </div>
     </section>
   </main>
@@ -359,41 +146,48 @@
     (() => {
       "use strict";
 
+      // HTML Elements
       const canvas = document.getElementById("canvas");
-      const menuScreen = document.getElementById("menuScreen");
-      const pauseScreen = document.getElementById("pauseScreen");
-      const gameOverScreen = document.getElementById("gameOverScreen");
+      const screens = {
+        menu: document.getElementById("menuScreen"),
+        pause: document.getElementById("pauseScreen"),
+        gameOver: document.getElementById("gameOverScreen"),
+        store: document.getElementById("storeScreen"),
+        profile: document.getElementById("profileScreen"),
+        settings: document.getElementById("settingsScreen")
+      };
       const hud = document.getElementById("hud");
       const controls = document.getElementById("controls");
 
       const scoreText = document.getElementById("score");
       const coinsText = document.getElementById("coins");
-      const finalScoreText = document.getElementById("finalScore");
-      const bestScoreText = document.getElementById("bestScore");
-      const finalCoinsText = document.getElementById("finalCoins");
 
+      // Game Variables (Aapke original logic ke hisaab se)
       let running = false;
       let paused = false;
       let lastTime = performance.now();
       let score = 0;
       let coins = 0;
-      let speed = 500;
       let distance = 0;
+      let speed = 50; // 3D z-axis speed
+      let spawnTimer = 0;
+      let objects = []; // Obstacles & coins array
+      let isRevived = false;
 
-      // 3D Player Physics variables
-      let playerLane = 0; // -1 (Left), 0 (Center), 1 (Right)
-      let playerTargetX = 0;
+      // Player Mechanics
+      let playerLane = 0; // -1, 0, 1
+      let playerX = 0;
       let jumpHeight = 0;
-      let isJumping = false;
       let jumpVelocity = 0;
+      const laneWidth = 3;
 
-      // --- THREE.JS SETUP ---
+      // --- THREE.JS INITIALIZATION ---
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x040718); // Dark background
-      scene.fog = new THREE.FogExp2(0x040718, 0.05); // Fade out effect in distance
+      scene.background = new THREE.Color(0x020412);
+      scene.fog = new THREE.Fog(0x020412, 10, 80);
 
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 4, 8); // Camera upar aur peeche
+      const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 4, 7);
       camera.lookAt(0, 1, 0);
 
       const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
@@ -401,78 +195,97 @@
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
       // Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
       scene.add(ambientLight);
       const dirLight = new THREE.DirectionalLight(0x00eaff, 1.5);
-      dirLight.position.set(10, 20, 10);
+      dirLight.position.set(0, 10, 5);
       scene.add(dirLight);
 
-      // Endless Road Grid (Visual)
-      const gridHelper = new THREE.GridHelper(200, 100, 0x00eaff, 0x176bff);
-      gridHelper.position.y = 0;
-      gridHelper.position.z = -50;
-      scene.add(gridHelper);
+      // Environment (Endless Grid/Road)
+      const grid = new THREE.GridHelper(100, 50, 0x00dfff, 0x162347);
+      grid.position.y = 0;
+      grid.position.z = -20;
+      scene.add(grid);
 
-      // Aapka 3D Character Model Load karna
-      let playerModel = null;
+      // --- LOAD PLAYER MODEL ---
+      let playerModel = new THREE.Group(); 
+      scene.add(playerModel); // Placeholder hitbox jab tak model load na ho
+
       const loader = new THREE.GLTFLoader();
-      
-      // Exact yahi naam aapke screenshot mein tha
-      loader.load('assets/models/Rigged male character model.glb', function(gltf) {
+      loader.load('assets/models/Rigged male character model.glb', (gltf) => {
+        scene.remove(playerModel);
         playerModel = gltf.scene;
-        // Agar character zyada bada ya chhota ho, toh is (1,1,1) value ko adjust kar sakte hain
-        playerModel.scale.set(1, 1, 1);
+        playerModel.scale.set(1.2, 1.2, 1.2);
         playerModel.position.set(0, 0, 0);
         scene.add(playerModel);
-      }, undefined, function(error) {
-        console.error('Aapka character model load hone mein dikkat aayi:', error);
-      });
+      }, undefined, (e) => console.log('Model loading error', e));
 
-      // --- GAME CONTROLS LOGIC ---
-      function moveLeft() {
-        if (!running || paused) return;
-        playerLane = Math.max(-1, playerLane - 1);
-        playerTargetX = playerLane * 2.5; // Lane ki chaurai
-      }
 
-      function moveRight() {
-        if (!running || paused) return;
-        playerLane = Math.min(1, playerLane + 1);
-        playerTargetX = playerLane * 2.5;
-      }
-
-      function jump() {
-        if (!running || paused) return;
-        if (!isJumping) {
-          isJumping = true;
-          jumpVelocity = 15; // Jump power
+      // --- 3D OBSTACLES & COINS LOGIC ---
+      function spawnObject() {
+        const lane = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+        const isCoin = Math.random() < 0.4;
+        
+        let mesh;
+        if (isCoin) {
+          // Coin Geometry
+          const geo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
+          const mat = new THREE.MeshStandardMaterial({ color: 0xffd83d, emissive: 0xff8d00 });
+          mesh = new THREE.Mesh(geo, mat);
+          mesh.rotation.x = Math.PI / 2;
+          mesh.position.y = 1; // Coin hawa mein
+        } else {
+          // Barrier Geometry
+          const geo = new THREE.BoxGeometry(2, 2, 2);
+          const mat = new THREE.MeshStandardMaterial({ color: 0xff4d00, emissive: 0x880000 });
+          mesh = new THREE.Mesh(geo, mat);
+          mesh.position.y = 1;
         }
+
+        mesh.position.x = lane * laneWidth;
+        mesh.position.z = -80; // Door se aayega
+        scene.add(mesh);
+
+        objects.push({
+          mesh: mesh,
+          type: isCoin ? 'coin' : 'barrier',
+          lane: lane,
+          removed: false
+        });
+      }
+
+      // --- SCREENS LOGIC ---
+      function showScreen(screenName) {
+        Object.values(screens).forEach(s => s.classList.add('hidden'));
+        if(screenName) screens[screenName].classList.remove('hidden');
+      }
+
+      function goHome() {
+        running = false;
+        paused = false;
+        hud.classList.add("hidden");
+        controls.classList.add("hidden");
+        showScreen('menu');
       }
 
       function startGame() {
-        score = 0;
-        coins = 0;
-        distance = 0;
-        speed = 500;
-        playerLane = 0;
-        playerTargetX = 0;
-        jumpHeight = 0;
-        isJumping = false;
-        
-        if (playerModel) {
-            playerModel.position.set(0, 0, 0);
-        }
+        score = 0; coins = 0; distance = 0; speed = 30;
+        playerLane = 0; playerX = 0; jumpHeight = 0; jumpVelocity = 0;
+        isRevived = false;
 
-        running = true;
-        paused = false;
-        lastTime = performance.now();
+        if (playerModel) { playerModel.position.set(0, 0, 0); }
+        
+        // Remove old objects
+        objects.forEach(obj => scene.remove(obj.mesh));
+        objects = [];
 
         scoreText.textContent = "0";
         coinsText.textContent = "0";
 
-        menuScreen.classList.add("hidden");
-        pauseScreen.classList.add("hidden");
-        gameOverScreen.classList.add("hidden");
+        running = true; paused = false;
+        lastTime = performance.now();
+
+        showScreen(null);
         hud.classList.remove("hidden");
         controls.classList.remove("hidden");
       }
@@ -480,7 +293,7 @@
       function pauseGame() {
         if (!running || paused) return;
         paused = true;
-        pauseScreen.classList.remove("hidden");
+        showScreen('pause');
         controls.classList.add("hidden");
       }
 
@@ -488,102 +301,165 @@
         if (!running) return;
         paused = false;
         lastTime = performance.now();
-        pauseScreen.classList.add("hidden");
+        showScreen(null);
         controls.classList.remove("hidden");
       }
 
       function endGame() {
         running = false;
-        paused = false;
-
-        const savedBest = Number(localStorage.getItem("runnerBestScore") || 0);
-        const best = Math.max(savedBest, score);
+        
+        const best = Math.max(Number(localStorage.getItem("runnerBestScore") || 0), score);
         localStorage.setItem("runnerBestScore", String(best));
 
-        finalScoreText.textContent = score;
-        bestScoreText.textContent = best;
-        finalCoinsText.textContent = coins;
+        document.getElementById("finalScore").textContent = score;
+        document.getElementById("bestScore").textContent = best;
+        document.getElementById("finalCoins").textContent = coins;
+        document.getElementById("finalSpeed").textContent = (speed/30).toFixed(1) + "x";
+
+        // Agar ek baar revive ho chuka hai, toh dobara ad button mat dikhao
+        document.getElementById("reviveButton").style.display = isRevived ? "none" : "block";
 
         hud.classList.add("hidden");
         controls.classList.add("hidden");
-        gameOverScreen.classList.remove("hidden");
+        showScreen('gameOver');
       }
 
-      // --- GAME LOOP & UPDATES ---
-      function update(deltaTime) {
-        speed = Math.min(1050, speed + deltaTime * 6);
-        distance += speed * deltaTime * 0.045;
-        score = Math.floor(distance) + coins * 25;
-        scoreText.textContent = String(score);
-
-        // Grid Animation (Road ko piche dhakelna)
-        gridHelper.position.z += speed * deltaTime * 0.02;
-        if (gridHelper.position.z > 0) {
-            gridHelper.position.z = -50;
-        }
-
-        // Character Physics and Movement
-        if (playerModel) {
-            // Smooth left/right movement
-            playerModel.position.x += (playerTargetX - playerModel.position.x) * Math.min(1, deltaTime * 10);
-            
-            // Jump mechanics
-            if (isJumping) {
-                jumpHeight += jumpVelocity * deltaTime;
-                jumpVelocity -= 50 * deltaTime; // Gravity
-                
-                playerModel.position.y = jumpHeight;
-                
-                if (jumpHeight <= 0) {
-                    jumpHeight = 0;
-                    isJumping = false;
-                    playerModel.position.y = 0;
-                }
-            }
-        }
+      function watchAdAndRevive() {
+        // YAHAN ADMOB KA CODE AAYEGA FUTURE MEIN
+        alert("Ad playing... Player Revived!");
+        isRevived = true;
+        
+        // As-paas ke obstacles hata do taaki turant na mare
+        objects.forEach(obj => {
+          if (obj.mesh.position.z > -20) {
+            scene.remove(obj.mesh);
+            obj.removed = true;
+          }
+        });
+        
+        running = true;
+        paused = false;
+        lastTime = performance.now();
+        showScreen(null);
+        hud.classList.remove("hidden");
+        controls.classList.remove("hidden");
       }
 
-      function gameLoop(currentTime) {
-        const deltaTime = Math.min(0.034, Math.max(0, (currentTime - lastTime) / 1000));
-        lastTime = currentTime;
-
-        if (running && !paused) {
-          update(deltaTime);
-        }
-
-        renderer.render(scene, camera);
-        requestAnimationFrame(gameLoop);
+      // --- CONTROLS ---
+      function moveLeft() { if (running && !paused) playerLane = Math.max(-1, playerLane - 1); }
+      function moveRight() { if (running && !paused) playerLane = Math.min(1, playerLane + 1); }
+      function jump() {
+        if (running && !paused && jumpHeight <= 0.1) jumpVelocity = 12;
       }
 
-      // Button Events
-      document.getElementById("playButton").addEventListener("click", startGame);
-      document.getElementById("restartButton").addEventListener("click", startGame);
-      document.getElementById("pauseButton").addEventListener("click", pauseGame);
-      document.getElementById("resumeButton").addEventListener("click", resumeGame);
-      document.getElementById("leftButton").addEventListener("pointerdown", moveLeft);
-      document.getElementById("rightButton").addEventListener("pointerdown", moveRight);
-      document.getElementById("jumpButton").addEventListener("pointerdown", jump);
-
-      // Keyboard Controls for PC testing
-      window.addEventListener("keydown", event => {
-        if (event.code === "ArrowLeft") moveLeft();
-        if (event.code === "ArrowRight") moveRight();
-        if (event.code === "ArrowUp" || event.code === "Space") {
-          event.preventDefault();
+      // Exact Swipe Logic from original code
+      let swipeStartX = 0, swipeStartY = 0;
+      canvas.addEventListener("pointerdown", e => { swipeStartX = e.clientX; swipeStartY = e.clientY; });
+      canvas.addEventListener("pointerup", e => {
+        if (!running || paused) return;
+        const diffX = e.clientX - swipeStartX;
+        const diffY = e.clientY - swipeStartY;
+        if (Math.abs(diffX) < 30 && Math.abs(diffY) < 30) return;
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+          diffX > 0 ? moveRight() : moveLeft();
+        } else if (diffY < 0) {
           jump();
         }
       });
 
-      // Resize handling
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+      window.addEventListener("keydown", e => {
+        if (e.code === "ArrowLeft") moveLeft();
+        if (e.code === "ArrowRight") moveRight();
+        if (e.code === "ArrowUp" || e.code === "Space") jump();
       });
 
-      // Start loop
-      requestAnimationFrame(gameLoop);
-    })();
-  </script>
-</body>
-</html>
+      // --- GAME LOOP ---
+      function updateLogic(delta) {
+        speed = Math.min(80, speed + delta * 0.5); // Speed badhna
+        distance += speed * delta;
+        score = Math.floor(distance) + coins * 25;
+        scoreText.textContent = score;
+
+        // Grid Animation
+        grid.position.z += speed * delta;
+        if (grid.position.z > 0) grid.position.z = -10;
+
+        // Player Movement & Physics
+        if (playerModel) {
+          const targetX = playerLane * laneWidth;
+          playerModel.position.x += (targetX - playerModel.position.x) * Math.min(1, delta * 15);
+
+          if (jumpVelocity !== 0 || jumpHeight > 0) {
+            jumpHeight += jumpVelocity * delta;
+            jumpVelocity -= 30 * delta; // Gravity
+            if (jumpHeight <= 0) { jumpHeight = 0; jumpVelocity = 0; }
+            playerModel.position.y = jumpHeight;
+          }
+        }
+
+        // Spawning Objects
+        spawnTimer -= delta;
+        if (spawnTimer <= 0) {
+          spawnObject();
+          spawnTimer = Math.max(0.4, 1.2 - (speed - 30) / 100);
+        }
+
+        // Move and Check Collisions
+        const playerBox = new THREE.Box3().setFromObject(playerModel);
+        // Chota hitbox taaki fair rahe
+        playerBox.expandByScalar(-0.4); 
+
+        for (let i = objects.length - 1; i >= 0; i--) {
+          let obj = objects[i];
+          if (obj.removed) continue;
+
+          obj.mesh.position.z += speed * delta;
+          if (obj.type === 'coin') obj.mesh.rotation.y += delta * 5; // Coin spin
+
+          // Collision Check
+          const objBox = new THREE.Box3().setFromObject(obj.mesh);
+          if (playerBox.intersectsBox(objBox)) {
+            if (obj.type === 'coin') {
+              coins++;
+              coinsText.textContent = coins;
+              scene.remove(obj.mesh);
+              obj.removed = true;
+            } else {
+              endGame(); // Hit Barrier
+            }
+          }
+
+          // Remove if behind camera
+          if (obj.mesh.position.z > 10) {
+            scene.remove(obj.mesh);
+            obj.removed = true;
+          }
+        }
+        objects = objects.filter(o => !o.removed);
+      }
+
+      function gameLoop(currentTime) {
+        const delta = Math.min(0.05, (currentTime - lastTime) / 1000);
+        lastTime = currentTime;
+        if (running && !paused) updateLogic(delta);
+        renderer.render(scene, camera);
+        requestAnimationFrame(gameLoop);
+      }
+
+      // --- BUTTON EVENTS ---
+      document.getElementById("playButton").addEventListener("click", startGame);
+      document.getElementById("restartButton").addEventListener("click", startGame);
+      document.getElementById("pauseButton").addEventListener("click", pauseGame);
+      document.getElementById("resumeButton").addEventListener("click", resumeGame);
+      
+      document.getElementById("leftButton").addEventListener("pointerdown", moveLeft);
+      document.getElementById("rightButton").addEventListener("pointerdown", moveRight);
+      document.getElementById("jumpButton").addEventListener("pointerdown", jump);
+
+      // Home & Menu Navigation
+      document.getElementById("pauseHomeButton").addEventListener("click", goHome);
+      document.getElementById("gameOverHomeButton").addEventListener("click", goHome);
+      document.getElementById("storeBtn").addEventListener("click", () => showScreen('store'));
+      document.getElementById("profileBtn").addEventListener("click", () => showScreen('profile'));
+      document.getElementById("settingsBtn").addEventListener("click", () => showScreen('settings'));
+      document.querySelectorAll('.backHomeBtn').forEach(btn => btn.addEventListene
