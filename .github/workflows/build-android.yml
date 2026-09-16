@@ -1,0 +1,145 @@
+name: Build Runner Android APK
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "www/**"
+      - "package.json"
+      - "capacitor.config.json"
+      - ".github/workflows/build-android.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Build Runner APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required files
+        shell: bash
+        run: |
+          test -f package.json || {
+            echo "::error::package.json is missing"
+            exit 1
+          }
+
+          test -f capacitor.config.json || {
+            echo "::error::capacitor.config.json is missing"
+            exit 1
+          }
+
+          test -f www/index.html || {
+            echo "::error::www/index.html is missing"
+            exit 1
+          }
+
+          echo "All required files are available."
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Install Capacitor dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Sync Runner game files
+        run: npx cap sync android
+
+      - name: Set portrait orientation
+        shell: bash
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          path = "android/app/src/main/AndroidManifest.xml"
+          android = "http://schemas.android.com/apk/res/android"
+          ET.register_namespace("android", android)
+
+          tree = ET.parse(path)
+          root = tree.getroot()
+
+          activity_found = False
+
+          for activity in root.findall("./application/activity"):
+              name = activity.get(f"{{{android}}}name", "")
+
+              if name == ".MainActivity" or name.endswith(".MainActivity"):
+                  activity.set(
+                      f"{{{android}}}screenOrientation",
+                      "portrait"
+                  )
+                  activity_found = True
+                  break
+
+          if not activity_found:
+              raise SystemExit("MainActivity was not found in AndroidManifest.xml")
+
+          tree.write(path, encoding="utf-8", xml_declaration=True)
+          print("Portrait orientation applied successfully.")
+          PY
+
+          grep -n "screenOrientation" "$MANIFEST"
+
+      - name: Make Gradle executable
+        run: chmod +x android/gradlew
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Prepare APK for download
+        shell: bash
+        run: |
+          mkdir -p output
+
+          cp \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            output/Runner-debug.apk
+
+          test -f output/Runner-debug.apk
+          ls -lh output/Runner-debug.apk
+
+      - name: Upload Runner APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runner-Android-APK
+          path: output/Runner-debug.apk
+          if-no-files-found: error
+          retention-days: 30
