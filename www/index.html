@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#040718">
-  <title>Runner 3D Pro</title>
+  <title>Runner</title>
 
   <style>
-    /* --- AAPKA ORIGINAL AUR NAYA CSS --- */
+    /* --- RUNNER 3D PRO DESIGN --- */
     :root { --cyan: #00eaff; --blue: #176bff; --purple: #a826ff; --orange: #ff9500; --dark: #030615; }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: var(--dark); color: white; font-family: Arial, Helvetica, sans-serif; touch-action: none; }
@@ -50,7 +50,7 @@
     .hidden { display: none !important; }
   </style>
 
-  <!-- Three.js -->
+  <!-- Three.js Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
@@ -78,7 +78,7 @@
     <!-- HOME SCREEN -->
     <section id="menuScreen" class="screen">
       <div class="panel">
-        <h1>Runner 3D</h1>
+        <h1>Runner</h1>
         <p class="tagline">ULTIMATE RUN</p>
         <button id="playButton" class="primary-button">Play Game</button>
         <div class="menu-grid">
@@ -94,7 +94,7 @@
       <div class="panel">
         <h2>Paused</h2>
         <button id="resumeButton" class="primary-button">Resume</button>
-        <button id="pauseHomeButton" class="secondary-button">🏠 Home</button>
+        <button id="pauseHomeButton" class="secondary-button" style="margin-top: 10px;">🏠 Home</button>
       </div>
     </section>
 
@@ -146,7 +146,6 @@
     (() => {
       "use strict";
 
-      // HTML Elements
       const canvas = document.getElementById("canvas");
       const screens = {
         menu: document.getElementById("menuScreen"),
@@ -162,21 +161,18 @@
       const scoreText = document.getElementById("score");
       const coinsText = document.getElementById("coins");
 
-      // Game Variables (Aapke original logic ke hisaab se)
       let running = false;
       let paused = false;
       let lastTime = performance.now();
       let score = 0;
       let coins = 0;
       let distance = 0;
-      let speed = 50; // 3D z-axis speed
+      let speed = 50; 
       let spawnTimer = 0;
-      let objects = []; // Obstacles & coins array
+      let objects = []; 
       let isRevived = false;
 
-      // Player Mechanics
-      let playerLane = 0; // -1, 0, 1
-      let playerX = 0;
+      let playerLane = 0; 
       let jumpHeight = 0;
       let jumpVelocity = 0;
       const laneWidth = 3;
@@ -201,7 +197,7 @@
       dirLight.position.set(0, 10, 5);
       scene.add(dirLight);
 
-      // Environment (Endless Grid/Road)
+      // Environment Road Grid
       const grid = new THREE.GridHelper(100, 50, 0x00dfff, 0x162347);
       grid.position.y = 0;
       grid.position.z = -20;
@@ -209,7 +205,7 @@
 
       // --- LOAD PLAYER MODEL ---
       let playerModel = new THREE.Group(); 
-      scene.add(playerModel); // Placeholder hitbox jab tak model load na ho
+      scene.add(playerModel);
 
       const loader = new THREE.GLTFLoader();
       loader.load('assets/models/Rigged male character model.glb', (gltf) => {
@@ -218,24 +214,21 @@
         playerModel.scale.set(1.2, 1.2, 1.2);
         playerModel.position.set(0, 0, 0);
         scene.add(playerModel);
-      }, undefined, (e) => console.log('Model loading error', e));
+      }, undefined, (e) => console.log('Model loading error:', e));
 
-
-      // --- 3D OBSTACLES & COINS LOGIC ---
+      // --- OBSTACLES & COINS SPAWN ---
       function spawnObject() {
-        const lane = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+        const lane = Math.floor(Math.random() * 3) - 1; 
         const isCoin = Math.random() < 0.4;
         
         let mesh;
         if (isCoin) {
-          // Coin Geometry
           const geo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
           const mat = new THREE.MeshStandardMaterial({ color: 0xffd83d, emissive: 0xff8d00 });
           mesh = new THREE.Mesh(geo, mat);
           mesh.rotation.x = Math.PI / 2;
-          mesh.position.y = 1; // Coin hawa mein
+          mesh.position.y = 1; 
         } else {
-          // Barrier Geometry
           const geo = new THREE.BoxGeometry(2, 2, 2);
           const mat = new THREE.MeshStandardMaterial({ color: 0xff4d00, emissive: 0x880000 });
           mesh = new THREE.Mesh(geo, mat);
@@ -243,7 +236,7 @@
         }
 
         mesh.position.x = lane * laneWidth;
-        mesh.position.z = -80; // Door se aayega
+        mesh.position.z = -80; 
         scene.add(mesh);
 
         objects.push({
@@ -254,7 +247,7 @@
         });
       }
 
-      // --- SCREENS LOGIC ---
+      // --- SCREEN MANAGEMENT ---
       function showScreen(screenName) {
         Object.values(screens).forEach(s => s.classList.add('hidden'));
         if(screenName) screens[screenName].classList.remove('hidden');
@@ -269,13 +262,12 @@
       }
 
       function startGame() {
-        score = 0; coins = 0; distance = 0; speed = 30;
-        playerLane = 0; playerX = 0; jumpHeight = 0; jumpVelocity = 0;
+        score = 0; coins = 0; distance = 0; speed = 40;
+        playerLane = 0; jumpHeight = 0; jumpVelocity = 0;
         isRevived = false;
 
         if (playerModel) { playerModel.position.set(0, 0, 0); }
         
-        // Remove old objects
         objects.forEach(obj => scene.remove(obj.mesh));
         objects = [];
 
@@ -314,9 +306,8 @@
         document.getElementById("finalScore").textContent = score;
         document.getElementById("bestScore").textContent = best;
         document.getElementById("finalCoins").textContent = coins;
-        document.getElementById("finalSpeed").textContent = (speed/30).toFixed(1) + "x";
+        document.getElementById("finalSpeed").textContent = (speed/40).toFixed(1) + "x";
 
-        // Agar ek baar revive ho chuka hai, toh dobara ad button mat dikhao
         document.getElementById("reviveButton").style.display = isRevived ? "none" : "block";
 
         hud.classList.add("hidden");
@@ -325,11 +316,9 @@
       }
 
       function watchAdAndRevive() {
-        // YAHAN ADMOB KA CODE AAYEGA FUTURE MEIN
-        alert("Ad playing... Player Revived!");
+        alert("Ad watching simulation... Player Revived!");
         isRevived = true;
         
-        // As-paas ke obstacles hata do taaki turant na mare
         objects.forEach(obj => {
           if (obj.mesh.position.z > -20) {
             scene.remove(obj.mesh);
@@ -352,7 +341,6 @@
         if (running && !paused && jumpHeight <= 0.1) jumpVelocity = 12;
       }
 
-      // Exact Swipe Logic from original code
       let swipeStartX = 0, swipeStartY = 0;
       canvas.addEventListener("pointerdown", e => { swipeStartX = e.clientX; swipeStartY = e.clientY; });
       canvas.addEventListener("pointerup", e => {
@@ -373,40 +361,35 @@
         if (e.code === "ArrowUp" || e.code === "Space") jump();
       });
 
-      // --- GAME LOOP ---
+      // --- GAME LOOP & UPDATES ---
       function updateLogic(delta) {
-        speed = Math.min(80, speed + delta * 0.5); // Speed badhna
+        speed = Math.min(90, speed + delta * 0.4); 
         distance += speed * delta;
         score = Math.floor(distance) + coins * 25;
         scoreText.textContent = score;
 
-        // Grid Animation
         grid.position.z += speed * delta;
         if (grid.position.z > 0) grid.position.z = -10;
 
-        // Player Movement & Physics
         if (playerModel) {
           const targetX = playerLane * laneWidth;
           playerModel.position.x += (targetX - playerModel.position.x) * Math.min(1, delta * 15);
 
           if (jumpVelocity !== 0 || jumpHeight > 0) {
             jumpHeight += jumpVelocity * delta;
-            jumpVelocity -= 30 * delta; // Gravity
+            jumpVelocity -= 35 * delta; 
             if (jumpHeight <= 0) { jumpHeight = 0; jumpVelocity = 0; }
             playerModel.position.y = jumpHeight;
           }
         }
 
-        // Spawning Objects
         spawnTimer -= delta;
         if (spawnTimer <= 0) {
           spawnObject();
-          spawnTimer = Math.max(0.4, 1.2 - (speed - 30) / 100);
+          spawnTimer = Math.max(0.5, 1.5 - (speed - 40) / 80);
         }
 
-        // Move and Check Collisions
         const playerBox = new THREE.Box3().setFromObject(playerModel);
-        // Chota hitbox taaki fair rahe
         playerBox.expandByScalar(-0.4); 
 
         for (let i = objects.length - 1; i >= 0; i--) {
@@ -414,9 +397,8 @@
           if (obj.removed) continue;
 
           obj.mesh.position.z += speed * delta;
-          if (obj.type === 'coin') obj.mesh.rotation.y += delta * 5; // Coin spin
+          if (obj.type === 'coin') obj.mesh.rotation.y += delta * 5; 
 
-          // Collision Check
           const objBox = new THREE.Box3().setFromObject(obj.mesh);
           if (playerBox.intersectsBox(objBox)) {
             if (obj.type === 'coin') {
@@ -425,11 +407,10 @@
               scene.remove(obj.mesh);
               obj.removed = true;
             } else {
-              endGame(); // Hit Barrier
+              endGame(); 
             }
           }
 
-          // Remove if behind camera
           if (obj.mesh.position.z > 10) {
             scene.remove(obj.mesh);
             obj.removed = true;
@@ -446,7 +427,7 @@
         requestAnimationFrame(gameLoop);
       }
 
-      // --- BUTTON EVENTS ---
+      // --- EVENT BINDINGS ---
       document.getElementById("playButton").addEventListener("click", startGame);
       document.getElementById("restartButton").addEventListener("click", startGame);
       document.getElementById("pauseButton").addEventListener("click", pauseGame);
@@ -456,10 +437,23 @@
       document.getElementById("rightButton").addEventListener("pointerdown", moveRight);
       document.getElementById("jumpButton").addEventListener("pointerdown", jump);
 
-      // Home & Menu Navigation
       document.getElementById("pauseHomeButton").addEventListener("click", goHome);
       document.getElementById("gameOverHomeButton").addEventListener("click", goHome);
       document.getElementById("storeBtn").addEventListener("click", () => showScreen('store'));
       document.getElementById("profileBtn").addEventListener("click", () => showScreen('profile'));
       document.getElementById("settingsBtn").addEventListener("click", () => showScreen('settings'));
-      document.querySelectorAll('.backHomeBtn').forEach(btn => btn.addEventListene
+      document.querySelectorAll('.backHomeBtn').forEach(btn => btn.addEventListener('click', () => showScreen('menu')));
+
+      document.getElementById("reviveButton").addEventListener("click", watchAdAndRevive);
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      requestAnimationFrame(gameLoop);
+    })();
+  </script>
+</body>
+</html>
