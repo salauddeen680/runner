@@ -84,6 +84,15 @@ jobs:
           python3 - <<'PY'
           import os
           import xml.etree.ElementTree as ET
+          import subprocess
+          import sys
+
+          # Ensure Pillow is available or use alternative fallback via python script
+          try:
+              import PIL
+          except ImportError:
+              subprocess.check_call([sys.executable, "-m", "pip", "install", "pillow"])
+
           from PIL import Image
 
           path = "android/app/src/main/AndroidManifest.xml"
@@ -107,7 +116,7 @@ jobs:
           tree.write(path, encoding="utf-8", xml_declaration=True)
           print("Portrait orientation applied successfully.")
 
-          # Setup Launcher Icons if cover image exists
+          # Setup Launcher Icons using runner-cover.png
           cover_path = "www/runner-cover.png"
           if os.path.exists(cover_path):
               img = Image.open(cover_path).convert("RGBA")
