@@ -1,8 +1,7 @@
-name: Build Runner Android APK
+name: Build Runner Android APK and AAB
 
 on:
   workflow_dispatch:
-
   push:
     branches:
       - main
@@ -11,15 +10,16 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/build-android.yml"
+      - "www/runner-cover.png"
 
 permissions:
   contents: read
 
 jobs:
-  build-apk:
-    name: Build Runner APK
+  build-android:
+    name: Build Runner APK & AAB
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout repository
@@ -59,7 +59,6 @@ jobs:
       - name: Install Android SDK packages
         shell: bash
         run: |
-          # Automatically find the pre-installed sdkmanager on the runner
           SDKMANAGER=$(find $ANDROID_HOME/cmdline-tools -name "sdkmanager" -type f | head -n 1)
           
           yes | $SDKMANAGER --licenses >/dev/null || true
@@ -77,13 +76,15 @@ jobs:
       - name: Sync Runner game files
         run: npx cap sync android
 
-      - name: Set portrait orientation
+      - name: Apply App Icon and Portrait Orientation
         shell: bash
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
 
           python3 - <<'PY'
+          import os
           import xml.etree.ElementTree as ET
+          from PIL import Image
 
           path = "android/app/src/main/AndroidManifest.xml"
           android = "http://schemas.android.com/apk/res/android"
@@ -93,15 +94,10 @@ jobs:
           root = tree.getroot()
 
           activity_found = False
-
           for activity in root.findall("./application/activity"):
               name = activity.get(f"{{{android}}}name", "")
-
               if name == ".MainActivity" or name.endswith(".MainActivity"):
-                  activity.set(
-                      f"{{{android}}}screenOrientation",
-                      "portrait"
-                  )
+                  activity.set(f"{{{android}}}screenOrientation", "portrait")
                   activity_found = True
                   break
 
@@ -110,6 +106,30 @@ jobs:
 
           tree.write(path, encoding="utf-8", xml_declaration=True)
           print("Portrait orientation applied successfully.")
+
+          # Setup Launcher Icons if cover image exists
+          cover_path = "www/runner-cover.png"
+          if os.path.exists(cover_path):
+              img = Image.open(cover_path).convert("RGBA")
+              
+              res_dir = "android/app/src/main/res"
+              sizes = {
+                  "mipmap-mdpi": 48,
+                  "mipmap-hdpi": 72,
+                  "mipmap-xhdpi": 96,
+                  "mipmap-xxhdpi": 144,
+                  "mipmap-xxxhdpi": 192
+              }
+              
+              for folder, sz in sizes.items():
+                  target_folder = os.path.join(res_dir, folder)
+                  os.makedirs(target_folder, exist_ok=True)
+                  resized_img = img.resize((sz, sz), Image.Resampling.LANCZOS)
+                  resized_img.save(os.path.join(target_folder, "ic_launcher.png"), "PNG")
+                  resized_img.save(os.path.join(target_folder, "ic_launcher_round.png"), "PNG")
+              print("App icons generated and applied successfully.")
+          else:
+              print("Warning: www/runner-cover.png not found, skipping icon generation.")
           PY
 
           grep -n "screenOrientation" "$MANIFEST"
@@ -120,27 +140,36 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build debug APK
+      - name: Build Debug APK and Release AAB
         working-directory: android
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          ./gradlew assembleDebug --stacktrace
+          ./gradlew bundleRelease --stacktrace
 
-      - name: Prepare APK for download
+      - name: Prepare APK and AAB for download
         shell: bash
         run: |
           mkdir -p output
 
-          cp \
-            android/app/build/outputs/apk/debug/app-debug.apk \
-            output/Runner-debug.apk
+          # Copy Debug APK
+          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk output/Runner-debug.apk
+          fi
 
-          test -f output/Runner-debug.apk
-          ls -lh output/Runner-debug.apk
+          # Copy Release AAB
+          if [ -f "android/app/build/outputs/bundle/release/app-release.aab" ]; then
+            cp android/app/build/outputs/bundle/release/app-release.aab output/Runner-release.aab
+          fi
 
-      - name: Upload Runner APK
+          ls -lh output/
+
+      - name: Upload Runner APK and AAB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Runner-Android-APK
-          path: output/Runner-debug.apk
+          name: Runner-Android-Builds
+          path: |
+            output/Runner-debug.apk
+            output/Runner-release.aab
           if-no-files-found: error
           retention-days: 30
           
