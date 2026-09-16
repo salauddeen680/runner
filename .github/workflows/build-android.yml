@@ -56,6 +56,12 @@ jobs:
           distribution: "temurin"
           java-version: "21"
 
+      - name: Install System Dependencies (Python Pillow)
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pil python3-pip
+
       - name: Install Android SDK packages
         shell: bash
         run: |
@@ -84,15 +90,6 @@ jobs:
           python3 - <<'PY'
           import os
           import xml.etree.ElementTree as ET
-          import subprocess
-          import sys
-
-          # Ensure Pillow is available or use alternative fallback via python script
-          try:
-              import PIL
-          except ImportError:
-              subprocess.check_call([sys.executable, "-m", "pip", "install", "pillow"])
-
           from PIL import Image
 
           path = "android/app/src/main/AndroidManifest.xml"
