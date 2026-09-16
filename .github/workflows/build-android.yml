@@ -59,8 +59,11 @@ jobs:
       - name: Install Android SDK packages
         shell: bash
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager \
+          # Automatically find the pre-installed sdkmanager on the runner
+          SDKMANAGER=$(find $ANDROID_HOME/cmdline-tools -name "sdkmanager" -type f | head -n 1)
+          
+          yes | $SDKMANAGER --licenses >/dev/null || true
+          $SDKMANAGER \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
