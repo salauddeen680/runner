@@ -1,0 +1,8 @@
+{
+  "appId": "com.ccustudios.runner",
+  "appName": "Runner",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
