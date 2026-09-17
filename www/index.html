@@ -3,50 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#040718">
+  <meta name="theme-color" content="#5eb3ff">
   <title>Runner</title>
 
   <style>
-    /* --- RUNNER 3D PRO DESIGN --- */
-    :root { --cyan: #00eaff; --blue: #176bff; --purple: #a826ff; --orange: #ff9500; --dark: #030615; }
+    /* --- RUNNER PREMIUM UI DESIGN --- */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Nunito:wght@700&display=swap');
+
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--dark); color: white; font-family: Arial, Helvetica, sans-serif; touch-action: none; }
-    #game { position: relative; width: 100%; height: 100%; overflow: hidden; background: #040718; }
-    #canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #5eb3ff; font-family: 'Nunito', sans-serif; }
     
-    /* HUD */
-    #hud { position: absolute; z-index: 5; top: max(14px, env(safe-area-inset-top)); left: 14px; right: 14px; display: flex; justify-content: space-between; pointer-events: none; }
-    .hud-left { display: flex; gap: 8px; }
-    .hud-box { min-width: 78px; padding: 8px 11px; border: 1px solid rgba(0, 234, 255, 0.65); border-radius: 14px; background: rgba(2, 7, 25, 0.78); box-shadow: 0 0 15px rgba(0, 234, 255, 0.2); text-align: center; }
-    .hud-label { color: #9beeff; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
-    .hud-value { margin-top: 2px; font-size: 19px; font-weight: 900; }
-    #pauseButton { width: 46px; height: 46px; border: 1px solid var(--cyan); border-radius: 50%; background: rgba(3, 8, 30, 0.85); color: white; font-size: 18px; pointer-events: auto; }
-
-    /* Screens */
-    .screen { position: absolute; z-index: 20; inset: 0; display: flex; align-items: center; justify-content: center; padding: 18px; background: radial-gradient(circle at 50% 30%, rgba(23, 107, 255, 0.3), transparent 45%), rgba(1, 3, 14, 0.8); backdrop-filter: blur(7px); }
-    .panel { width: min(92vw, 430px); max-height: 94vh; overflow: auto; padding: 19px; border: 2px solid rgba(0, 234, 255, 0.8); border-radius: 28px; background: linear-gradient(150deg, rgba(8, 18, 51, 0.97), rgba(7, 4, 30, 0.97)); box-shadow: 0 0 30px rgba(0, 234, 255, 0.28), 0 0 60px rgba(168, 38, 255, 0.18); text-align: center; }
+    #game { position: relative; width: 100%; height: 100%; overflow: hidden; }
     
-    h1 { font-size: clamp(38px, 10vw, 58px); line-height: 1; letter-spacing: 4px; text-transform: uppercase; background: linear-gradient(90deg, var(--cyan), white, var(--purple)); -webkit-background-clip: text; color: transparent; filter: drop-shadow(0 0 9px rgba(0, 234, 255, 0.65)); }
-    h2 { margin-bottom: 10px; color: var(--cyan); font-size: 31px; }
-    .tagline { margin: 9px 0 14px; color: #b7c7ff; font-size: 14px; letter-spacing: 1.5px; }
-
-    /* Buttons */
-    .primary-button { width: 100%; min-height: 55px; margin-top: 8px; border: 0; border-radius: 17px; background: linear-gradient(90deg, #00d8ff, #2367ff, #aa25ff); box-shadow: 0 7px 0 #071e7a, 0 0 20px rgba(0, 216, 255, 0.45); color: white; font-size: 19px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px;}
-    .primary-button:active { transform: translateY(5px); box-shadow: 0 2px 0 #071e7a, 0 0 14px rgba(0, 216, 255, 0.4); }
-    .secondary-button { width: 100%; min-height: 45px; margin-top: 8px; border: 2px solid var(--cyan); border-radius: 12px; background: transparent; color: white; font-size: 16px; font-weight: bold; text-transform: uppercase; }
-    .ad-button { width: 100%; min-height: 55px; margin-top: 8px; margin-bottom:15px; border: 2px solid #00ff88; border-radius: 17px; background: rgba(0, 255, 136, 0.1); color: #00ff88; font-size: 17px; font-weight: bold; text-transform: uppercase; }
-
-    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+    /* 3D Canvas ko sabse peeche rakha hai */
+    #canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; z-index: 1; }
     
-    .results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 17px 0; }
-    .result-box { padding: 13px 7px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); }
-    .result-box strong { display: block; color: var(--cyan); font-size: 25px; }
-    .result-box span { color: #aab8e5; font-size: 11px; text-transform: uppercase; }
+    /* UI Container */
+    #ui-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; display: flex; flex-direction: column; }
+    
+    /* TOP MENU (Score & Coins) */
+    .top-bar { display: flex; justify-content: space-between; padding: 20px 15px; width: 100%; pointer-events: auto; }
+    .status-pill { background: #0a1931; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; border: 2px solid #1a365d; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    .status-pill.gold { color: #ffd700; }
 
-    /* Controls */
-    #controls { position: absolute; z-index: 8; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: min(6vw, 25px); padding: 0 16px; pointer-events: none; }
-    .control { width: min(20vw, 78px); height: min(20vw, 78px); border: 2px solid var(--cyan); border-radius: 50%; background: rgba(4, 13, 43, 0.82); box-shadow: 0 0 18px rgba(0, 234, 255, 0.35); color: white; font-size: 29px; font-weight: bold; pointer-events: auto; }
-    .control:active { transform: scale(0.9); background: rgba(25, 104, 255, 0.85); }
+    /* TITLE - Sirf RUNNER Upar */
+    .title-container { width: 100%; text-align: center; margin-top: 20px; pointer-events: auto; }
+    .game-title { font-family: 'Montserrat', sans-serif; font-size: 65px; font-weight: 900; color: #00eaff; text-transform: uppercase; letter-spacing: 4px; text-shadow: 4px 4px 0 #0a1931, -2px -2px 0 #0a1931, 2px -2px 0 #0a1931, -2px 2px 0 #0a1931, 2px 2px 0 #0a1931; }
+    
+    /* CENTER PLAY BUTTON */
+    .center-menu { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+    .play-btn { background: linear-gradient(180deg, #ff8c00, #ff6a00); color: white; border: 4px solid #fff; border-radius: 40px; padding: 15px 60px; font-size: 28px; font-family: 'Montserrat', sans-serif; font-weight: 900; cursor: pointer; box-shadow: 0 8px 0 #cc5500, 0 10px 20px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transition: transform 0.1s; letter-spacing: 2px; }
+    .play-btn:active { transform: translateY(8px); box-shadow: 0 0px 0 #cc5500, 0 5px 10px rgba(0,0,0,0.5); }
+    
+    /* BOTTOM NAVIGATION (Store, Profile, Settings) */
+    .bottom-nav { display: flex; justify-content: center; gap: 20px; padding-bottom: 30px; pointer-events: auto; }
+    .nav-btn { background: #0a1931; color: white; border: 2px solid #1a365d; border-radius: 18px; width: 90px; height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: bold; box-shadow: 0 6px 10px rgba(0,0,0,0.4); transition: transform 0.1s; cursor: pointer; }
+    .nav-btn .icon { font-size: 28px; color: #4fc3f7; }
+    .nav-btn.store-btn .icon { color: #ffd700; }
+    .nav-btn:active { transform: scale(0.95); }
+
+    /* MODAL PANELS (Popups) */
+    .modal-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 20; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); pointer-events: auto; }
+    .modal-panel { background: #0a1931; border: 3px solid #00eaff; border-radius: 20px; width: 85%; max-width: 400px; padding: 25px; color: white; text-align: center; box-shadow: 0 10px 40px rgba(0,234,255,0.2); }
+    .modal-title { font-family: 'Montserrat', sans-serif; font-size: 26px; color: #00eaff; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+    
+    .setting-row { display: flex; justify-content: space-between; background: #14284d; padding: 15px; border-radius: 12px; margin-bottom: 12px; align-items: center; font-size: 16px; border: 1px solid #1e3a6e; }
+    .setting-row strong { color: #00eaff; }
+    
+    .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .store-item { background: #14284d; padding: 15px; border-radius: 12px; border: 2px solid #1e3a6e; font-size: 14px; font-weight: bold; }
+    .store-item span { color: #ffd700; display: block; margin-top: 8px; }
+
+    .close-btn { background: #ff4757; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 900; font-size: 16px; margin-top: 15px; width: 100%; box-shadow: 0 5px 0 #c0392b; cursor: pointer; text-transform: uppercase; }
+    .close-btn:active { transform: translateY(5px); box-shadow: none; }
+
+    /* GAME HUD (In-Game Stats & Controls) */
+    #game-hud { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 10; pointer-events: none; }
+    .hud-btn { pointer-events: auto; background: #0a1931; color: white; border: 2px solid #00eaff; width: 45px; height: 45px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; font-weight: bold; cursor: pointer; }
+    
     .hidden { display: none !important; }
   </style>
 
@@ -57,403 +71,376 @@
 
 <body>
   <main id="game">
+    <!-- 3D Canvas -->
     <canvas id="canvas"></canvas>
 
-    <!-- HUD -->
-    <div id="hud" class="hidden">
-      <div class="hud-left">
-        <div class="hud-box"><div class="hud-label">Score</div><div id="score" class="hud-value">0</div></div>
-        <div class="hud-box"><div class="hud-label">Coins</div><div id="coins" class="hud-value">0</div></div>
+    <!-- UI LAYER -->
+    <div id="ui-layer">
+      
+      <!-- MENU BAR -->
+      <div id="menu-top-bar" class="top-bar">
+        <div class="status-pill">🏆 BEST: <span id="menuBestScore">0</span></div>
+        <div class="status-pill gold">🪙 <span id="menuCoinsTotal">0</span></div>
       </div>
-      <button id="pauseButton" aria-label="Pause game">Ⅱ</button>
-    </div>
 
-    <!-- Mobile Controls -->
-    <div id="controls" class="hidden">
-      <button id="leftButton" class="control">←</button>
-      <button id="jumpButton" class="control">↑</button>
-      <button id="rightButton" class="control">→</button>
-    </div>
+      <!-- IN-GAME HUD -->
+      <div id="game-hud" class="hidden">
+        <div class="status-pill">SCORE: <span id="inGameScore">0</span></div>
+        <div class="status-pill gold">🪙 <span id="inGameCoins">0</span></div>
+        <div class="hud-btn" id="pauseBtn">||</div>
+      </div>
 
-    <!-- HOME SCREEN -->
-    <section id="menuScreen" class="screen">
-      <div class="panel">
-        <h1>Runner</h1>
-        <p class="tagline">ULTIMATE RUN</p>
-        <button id="playButton" class="primary-button">Play Game</button>
-        <div class="menu-grid">
-          <button id="storeBtn" class="secondary-button">🛒 Store</button>
-          <button id="profileBtn" class="secondary-button">👤 Profile</button>
-          <button id="settingsBtn" class="secondary-button" style="grid-column: span 2;">⚙️ Settings</button>
+      <!-- MAIN MENU (Title & Play Button) -->
+      <div id="main-menu">
+        <div class="title-container">
+          <h1 class="game-title">RUNNER</h1>
+        </div>
+        
+        <div class="center-menu">
+          <button id="playBtn" class="play-btn">▶ PLAY</button>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-btn" onclick="showModal('profileModal')">
+            <span class="icon">👤</span><span>Profile</span>
+          </div>
+          <div class="nav-btn" onclick="showModal('settingsModal')">
+            <span class="icon">⚙️</span><span>Settings</span>
+          </div>
+          <div class="nav-btn store-btn" onclick="showModal('storeModal')">
+            <span class="icon">🛒</span><span>Store</span>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- PAUSE SCREEN -->
-    <section id="pauseScreen" class="screen hidden">
-      <div class="panel">
-        <h2>Paused</h2>
-        <button id="resumeButton" class="primary-button">Resume</button>
-        <button id="pauseHomeButton" class="secondary-button" style="margin-top: 10px;">🏠 Home</button>
+    <!-- MODAL PANELS -->
+    
+    <!-- Profile -->
+    <div id="profileModal" class="modal-overlay hidden">
+      <div class="modal-panel">
+        <h2 class="modal-title">Profile</h2>
+        <div class="setting-row">Total Runs: <strong id="statsRuns">0</strong></div>
+        <div class="setting-row">High Score: <strong id="statsScore">0</strong></div>
+        <div class="setting-row">Total Coins: <strong id="statsCoins" style="color:#ffd700;">0</strong></div>
+        <button class="close-btn" onclick="closeModals()">BACK</button>
       </div>
-    </section>
+    </div>
 
-    <!-- GAME OVER SCREEN -->
-    <section id="gameOverScreen" class="screen hidden">
-      <div class="panel">
-        <h2>Run Over!</h2>
-        <div class="results">
-          <div class="result-box"><strong id="finalScore">0</strong><span>Score</span></div>
-          <div class="result-box"><strong id="bestScore">0</strong><span>Best Score</span></div>
-          <div class="result-box"><strong id="finalCoins">0</strong><span>Coins</span></div>
-          <div class="result-box"><strong id="finalSpeed">1.0x</strong><span>Speed</span></div>
+    <!-- Settings -->
+    <div id="settingsModal" class="modal-overlay hidden">
+      <div class="modal-panel">
+        <h2 class="modal-title">Settings</h2>
+        <div class="setting-row">Sound <strong>ON</strong></div>
+        <div class="setting-row">Music <strong>ON</strong></div>
+        <button class="close-btn" onclick="closeModals()">BACK</button>
+      </div>
+    </div>
+
+    <!-- Store -->
+    <div id="storeModal" class="modal-overlay hidden">
+      <div class="modal-panel">
+        <h2 class="modal-title">Store</h2>
+        <div class="store-grid">
+          <div class="store-item">👕 Neon Suit<span>🔒 1000</span></div>
+          <div class="store-item">🛹 Hoverboard<span>🔒 2500</span></div>
         </div>
-        <button id="reviveButton" class="ad-button">📺 Watch Ad to Revive</button>
-        <button id="restartButton" class="primary-button">New Game</button>
-        <button id="gameOverHomeButton" class="secondary-button">🏠 Home</button>
+        <button class="close-btn" onclick="closeModals()">BACK</button>
       </div>
-    </section>
+    </div>
 
-    <!-- STORE SCREEN -->
-    <section id="storeScreen" class="screen hidden">
-      <div class="panel">
-        <h2>Store</h2>
-        <p class="tagline">Skins coming soon...</p>
-        <button class="backHomeBtn primary-button">Back to Home</button>
+    <!-- Pause -->
+    <div id="pauseModal" class="modal-overlay hidden">
+      <div class="modal-panel">
+        <h2 class="modal-title">PAUSED</h2>
+        <button class="play-btn" style="width: 100%; justify-content:center; margin-bottom:15px; font-size:20px; padding:15px;" id="resumeBtn">RESUME</button>
+        <button class="close-btn" id="pauseHomeBtn" style="margin-top:0;">QUIT TO MENU</button>
       </div>
-    </section>
+    </div>
 
-    <!-- PROFILE SCREEN -->
-    <section id="profileScreen" class="screen hidden">
-      <div class="panel">
-        <h2>Profile</h2>
-        <p class="tagline">Player stats coming soon...</p>
-        <button class="backHomeBtn primary-button">Back to Home</button>
+    <!-- Game Over -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+      <div class="modal-panel">
+        <h2 class="modal-title" style="color:#ff4757;">RUN OVER!</h2>
+        <div class="setting-row">Score: <strong id="goScore" style="font-size:22px;">0</strong></div>
+        <div class="setting-row">Coins: <strong id="goCoins" style="color:#ffd700; font-size:22px;">0</strong></div>
+        
+        <button id="reviveBtn" class="play-btn" style="width: 100%; justify-content:center; font-size:16px; background:linear-gradient(180deg, #2ed573, #2f3542); box-shadow: 0 6px 0 #1e90ff; margin: 15px 0;">📺 WATCH AD TO REVIVE</button>
+        
+        <div style="display:flex; gap:10px;">
+          <button class="play-btn" style="flex:1; justify-content:center; font-size:16px; padding:15px 0;" id="restartBtn">RETRY</button>
+          <button class="close-btn" style="flex:1; margin-top:0;" id="goHomeBtn">HOME</button>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <!-- SETTINGS SCREEN -->
-    <section id="settingsScreen" class="screen hidden">
-      <div class="panel">
-        <h2>Settings</h2>
-        <p class="tagline">Audio & Controls...</p>
-        <button class="backHomeBtn primary-button">Back to Home</button>
-      </div>
-    </section>
   </main>
 
   <script>
-    (() => {
-      "use strict";
+    // --- UI AND LOCAL STORAGE LOGIC ---
+    const menuTopBar = document.getElementById('menu-top-bar');
+    const mainMenu = document.getElementById('main-menu');
+    const gameHud = document.getElementById('game-hud');
+    const allModals = document.querySelectorAll('.modal-overlay');
 
-      const canvas = document.getElementById("canvas");
-      const screens = {
-        menu: document.getElementById("menuScreen"),
-        pause: document.getElementById("pauseScreen"),
-        gameOver: document.getElementById("gameOverScreen"),
-        store: document.getElementById("storeScreen"),
-        profile: document.getElementById("profileScreen"),
-        settings: document.getElementById("settingsScreen")
-      };
-      const hud = document.getElementById("hud");
-      const controls = document.getElementById("controls");
+    let totalCoins = Number(localStorage.getItem('runnerTotalCoins') || 0);
+    let bestScore = Number(localStorage.getItem('runnerBestScore') || 0);
+    let totalRuns = Number(localStorage.getItem('runnerTotalRuns') || 0);
 
-      const scoreText = document.getElementById("score");
-      const coinsText = document.getElementById("coins");
+    function updateMenuStats() {
+      document.getElementById('menuBestScore').innerText = bestScore;
+      document.getElementById('menuCoinsTotal').innerText = totalCoins;
+      document.getElementById('statsScore').innerText = bestScore;
+      document.getElementById('statsRuns').innerText = totalRuns;
+      document.getElementById('statsCoins').innerText = totalCoins;
+    }
+    updateMenuStats();
 
-      let running = false;
-      let paused = false;
-      let lastTime = performance.now();
-      let score = 0;
-      let coins = 0;
-      let distance = 0;
-      let speed = 50; 
-      let spawnTimer = 0;
-      let objects = []; 
-      let isRevived = false;
+    function showModal(id) {
+      closeModals();
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModals() {
+      allModals.forEach(m => m.classList.add('hidden'));
+    }
 
-      let playerLane = 0; 
-      let jumpHeight = 0;
-      let jumpVelocity = 0;
-      const laneWidth = 3;
+    // --- THREE.JS 3D ENVIRONMENT ---
+    const canvas = document.getElementById('canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x60a3d9); // Sky Blue
+    scene.fog = new THREE.Fog(0x60a3d9, 20, 100);
 
-      // --- THREE.JS INITIALIZATION ---
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x020412);
-      scene.fog = new THREE.Fog(0x020412, 10, 80);
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 4, 8);
+    camera.lookAt(0, 1, 0);
 
-      const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 4, 7);
-      camera.lookAt(0, 1, 0);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(5, 10, 5);
+    scene.add(dirLight);
 
-      // Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-      scene.add(ambientLight);
-      const dirLight = new THREE.DirectionalLight(0x00eaff, 1.5);
-      dirLight.position.set(0, 10, 5);
-      scene.add(dirLight);
+    // Road Setup
+    const roadGeo = new THREE.PlaneGeometry(12, 200);
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
+    const road = new THREE.Mesh(roadGeo, roadMat);
+    road.rotation.x = -Math.PI / 2;
+    road.position.z = -50;
+    scene.add(road);
 
-      // Environment Road Grid
-      const grid = new THREE.GridHelper(100, 50, 0x00dfff, 0x162347);
-      grid.position.y = 0;
-      grid.position.z = -20;
-      scene.add(grid);
+    // --- PLAYER & ANIMATION SETUP ---
+    let playerModel = new THREE.Group(); 
+    scene.add(playerModel);
+    let mixer; // Animation Mixer for running
 
-      // --- LOAD PLAYER MODEL ---
-      let playerModel = new THREE.Group(); 
+    const loader = new THREE.GLTFLoader();
+    loader.load('assets/models/Rigged male character model.glb', (gltf) => {
+      scene.remove(playerModel);
+      playerModel = gltf.scene;
+      playerModel.scale.set(1.2, 1.2, 1.2);
+      playerModel.position.set(0, 0, 0);
+      playerModel.rotation.y = Math.PI; // Face forward
       scene.add(playerModel);
 
-      const loader = new THREE.GLTFLoader();
-      loader.load('assets/models/Rigged male character model.glb', (gltf) => {
-        scene.remove(playerModel);
-        playerModel = gltf.scene;
-        playerModel.scale.set(1.2, 1.2, 1.2);
-        playerModel.position.set(0, 0, 0);
-        scene.add(playerModel);
-      }, undefined, (e) => console.log('Model loading error:', e));
-
-      // --- OBSTACLES & COINS SPAWN ---
-      function spawnObject() {
-        const lane = Math.floor(Math.random() * 3) - 1; 
-        const isCoin = Math.random() < 0.4;
-        
-        let mesh;
-        if (isCoin) {
-          const geo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
-          const mat = new THREE.MeshStandardMaterial({ color: 0xffd83d, emissive: 0xff8d00 });
-          mesh = new THREE.Mesh(geo, mat);
-          mesh.rotation.x = Math.PI / 2;
-          mesh.position.y = 1; 
-        } else {
-          const geo = new THREE.BoxGeometry(2, 2, 2);
-          const mat = new THREE.MeshStandardMaterial({ color: 0xff4d00, emissive: 0x880000 });
-          mesh = new THREE.Mesh(geo, mat);
-          mesh.position.y = 1;
-        }
-
-        mesh.position.x = lane * laneWidth;
-        mesh.position.z = -80; 
-        scene.add(mesh);
-
-        objects.push({
-          mesh: mesh,
-          type: isCoin ? 'coin' : 'barrier',
-          lane: lane,
-          removed: false
-        });
+      // Play Animation if exists in model
+      if (gltf.animations && gltf.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(playerModel);
+        const action = mixer.clipAction(gltf.animations[0]);
+        action.play();
       }
+    }, undefined, (e) => console.log('Model load error:', e));
 
-      // --- SCREEN MANAGEMENT ---
-      function showScreen(screenName) {
-        Object.values(screens).forEach(s => s.classList.add('hidden'));
-        if(screenName) screens[screenName].classList.remove('hidden');
-      }
+    // Game Variables
+    let running = false;
+    let paused = false;
+    let lastTime = performance.now();
+    let score = 0, currentCoins = 0;
+    let speed = 25;
+    let playerLane = 0; // -1, 0, 1
+    const laneWidth = 3;
+    let jumpVelocity = 0, jumpHeight = 0;
+    let objects = [];
+    let isRevived = false;
+    let invincibilityTimer = 0;
+    let spawnTimer = 0;
 
-      function goHome() {
-        running = false;
-        paused = false;
-        hud.classList.add("hidden");
-        controls.classList.add("hidden");
-        showScreen('menu');
-      }
-
-      function startGame() {
-        score = 0; coins = 0; distance = 0; speed = 40;
-        playerLane = 0; jumpHeight = 0; jumpVelocity = 0;
-        isRevived = false;
-
-        if (playerModel) { playerModel.position.set(0, 0, 0); }
-        
-        objects.forEach(obj => scene.remove(obj.mesh));
-        objects = [];
-
-        scoreText.textContent = "0";
-        coinsText.textContent = "0";
-
-        running = true; paused = false;
-        lastTime = performance.now();
-
-        showScreen(null);
-        hud.classList.remove("hidden");
-        controls.classList.remove("hidden");
-      }
-
-      function pauseGame() {
-        if (!running || paused) return;
-        paused = true;
-        showScreen('pause');
-        controls.classList.add("hidden");
-      }
-
-      function resumeGame() {
-        if (!running) return;
-        paused = false;
-        lastTime = performance.now();
-        showScreen(null);
-        controls.classList.remove("hidden");
-      }
-
-      function endGame() {
-        running = false;
-        
-        const best = Math.max(Number(localStorage.getItem("runnerBestScore") || 0), score);
-        localStorage.setItem("runnerBestScore", String(best));
-
-        document.getElementById("finalScore").textContent = score;
-        document.getElementById("bestScore").textContent = best;
-        document.getElementById("finalCoins").textContent = coins;
-        document.getElementById("finalSpeed").textContent = (speed/40).toFixed(1) + "x";
-
-        document.getElementById("reviveButton").style.display = isRevived ? "none" : "block";
-
-        hud.classList.add("hidden");
-        controls.classList.add("hidden");
-        showScreen('gameOver');
-      }
-
-      function watchAdAndRevive() {
-        alert("Ad watching simulation... Player Revived!");
-        isRevived = true;
-        
-        objects.forEach(obj => {
-          if (obj.mesh.position.z > -20) {
-            scene.remove(obj.mesh);
-            obj.removed = true;
-          }
-        });
-        
-        running = true;
-        paused = false;
-        lastTime = performance.now();
-        showScreen(null);
-        hud.classList.remove("hidden");
-        controls.classList.remove("hidden");
-      }
-
-      // --- CONTROLS ---
-      function moveLeft() { if (running && !paused) playerLane = Math.max(-1, playerLane - 1); }
-      function moveRight() { if (running && !paused) playerLane = Math.min(1, playerLane + 1); }
-      function jump() {
-        if (running && !paused && jumpHeight <= 0.1) jumpVelocity = 12;
-      }
-
-      let swipeStartX = 0, swipeStartY = 0;
-      canvas.addEventListener("pointerdown", e => { swipeStartX = e.clientX; swipeStartY = e.clientY; });
-      canvas.addEventListener("pointerup", e => {
-        if (!running || paused) return;
-        const diffX = e.clientX - swipeStartX;
-        const diffY = e.clientY - swipeStartY;
-        if (Math.abs(diffX) < 30 && Math.abs(diffY) < 30) return;
-        if (Math.abs(diffX) > Math.abs(diffY)) {
-          diffX > 0 ? moveRight() : moveLeft();
-        } else if (diffY < 0) {
-          jump();
-        }
-      });
-
-      window.addEventListener("keydown", e => {
-        if (e.code === "ArrowLeft") moveLeft();
-        if (e.code === "ArrowRight") moveRight();
-        if (e.code === "ArrowUp" || e.code === "Space") jump();
-      });
-
-      // --- GAME LOOP & UPDATES ---
-      function updateLogic(delta) {
-        speed = Math.min(90, speed + delta * 0.4); 
-        distance += speed * delta;
-        score = Math.floor(distance) + coins * 25;
-        scoreText.textContent = score;
-
-        grid.position.z += speed * delta;
-        if (grid.position.z > 0) grid.position.z = -10;
-
-        if (playerModel) {
-          const targetX = playerLane * laneWidth;
-          playerModel.position.x += (targetX - playerModel.position.x) * Math.min(1, delta * 15);
-
-          if (jumpVelocity !== 0 || jumpHeight > 0) {
-            jumpHeight += jumpVelocity * delta;
-            jumpVelocity -= 35 * delta; 
-            if (jumpHeight <= 0) { jumpHeight = 0; jumpVelocity = 0; }
-            playerModel.position.y = jumpHeight;
-          }
-        }
-
-        spawnTimer -= delta;
-        if (spawnTimer <= 0) {
-          spawnObject();
-          spawnTimer = Math.max(0.5, 1.5 - (speed - 40) / 80);
-        }
-
-        const playerBox = new THREE.Box3().setFromObject(playerModel);
-        playerBox.expandByScalar(-0.4); 
-
-        for (let i = objects.length - 1; i >= 0; i--) {
-          let obj = objects[i];
-          if (obj.removed) continue;
-
-          obj.mesh.position.z += speed * delta;
-          if (obj.type === 'coin') obj.mesh.rotation.y += delta * 5; 
-
-          const objBox = new THREE.Box3().setFromObject(obj.mesh);
-          if (playerBox.intersectsBox(objBox)) {
-            if (obj.type === 'coin') {
-              coins++;
-              coinsText.textContent = coins;
-              scene.remove(obj.mesh);
-              obj.removed = true;
-            } else {
-              endGame(); 
-            }
-          }
-
-          if (obj.mesh.position.z > 10) {
-            scene.remove(obj.mesh);
-            obj.removed = true;
-          }
-        }
-        objects = objects.filter(o => !o.removed);
-      }
-
-      function gameLoop(currentTime) {
-        const delta = Math.min(0.05, (currentTime - lastTime) / 1000);
-        lastTime = currentTime;
-        if (running && !paused) updateLogic(delta);
-        renderer.render(scene, camera);
-        requestAnimationFrame(gameLoop);
-      }
-
-      // --- EVENT BINDINGS ---
-      document.getElementById("playButton").addEventListener("click", startGame);
-      document.getElementById("restartButton").addEventListener("click", startGame);
-      document.getElementById("pauseButton").addEventListener("click", pauseGame);
-      document.getElementById("resumeButton").addEventListener("click", resumeGame);
+    // Object Spawner (Coins & Barriers)
+    function spawnObject() {
+      const lane = Math.floor(Math.random() * 3) - 1;
+      const isCoin = Math.random() < 0.5;
       
-      document.getElementById("leftButton").addEventListener("pointerdown", moveLeft);
-      document.getElementById("rightButton").addEventListener("pointerdown", moveRight);
-      document.getElementById("jumpButton").addEventListener("pointerdown", jump);
+      let mesh;
+      if (isCoin) {
+        const geo = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16);
+        const mat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xb8860b });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.rotation.x = Math.PI / 2;
+        mesh.position.y = 1;
+      } else {
+        const geo = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+        const mat = new THREE.MeshStandardMaterial({ color: 0xe74c3c, emissive: 0x800000 });
+        mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = 0.9;
+      }
+      mesh.position.x = lane * laneWidth;
+      mesh.position.z = -100; 
+      scene.add(mesh);
+      objects.push({ mesh, type: isCoin ? 'coin' : 'barrier', removed: false });
+    }
 
-      document.getElementById("pauseHomeButton").addEventListener("click", goHome);
-      document.getElementById("gameOverHomeButton").addEventListener("click", goHome);
-      document.getElementById("storeBtn").addEventListener("click", () => showScreen('store'));
-      document.getElementById("profileBtn").addEventListener("click", () => showScreen('profile'));
-      document.getElementById("settingsBtn").addEventListener("click", () => showScreen('settings'));
-      document.querySelectorAll('.backHomeBtn').forEach(btn => btn.addEventListener('click', () => showScreen('menu')));
+    // Controls
+    function moveLeft() { if(running && !paused) playerLane = Math.max(-1, playerLane - 1); }
+    function moveRight() { if(running && !paused) playerLane = Math.min(1, playerLane + 1); }
+    function jump() { if(running && !paused && jumpHeight <= 0.1) jumpVelocity = 15; }
 
-      document.getElementById("reviveButton").addEventListener("click", watchAdAndRevive);
+    // Touch Controls (Swipe)
+    let startX = 0, startY = 0;
+    window.addEventListener("pointerdown", e => { startX = e.clientX; startY = e.clientY; });
+    window.addEventListener("pointerup", e => {
+      if (!running || paused) return;
+      let dx = e.clientX - startX, dy = e.clientY - startY;
+      if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+        if (Math.abs(dx) > Math.abs(dy)) dx > 0 ? moveRight() : moveLeft();
+        else if (dy < 0) jump();
+      }
+    });
 
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
+    // Keyboard Controls
+    window.addEventListener("keydown", e => {
+      if (e.code === "ArrowLeft") moveLeft();
+      if (e.code === "ArrowRight") moveRight();
+      if (e.code === "ArrowUp" || e.code === "Space") jump();
+    });
 
-      requestAnimationFrame(gameLoop);
-    })();
-  </script>
-</body>
-</html>
+    // Core Game Flow Functions
+    function startGame() {
+      totalRuns++;
+      localStorage.setItem('runnerTotalRuns', totalRuns);
+      
+      score = 0; currentCoins = 0; speed = 30; playerLane = 0; jumpHeight = 0;
+      isRevived = false; invincibilityTimer = 0;
+      if (playerModel) playerModel.position.set(0, 0, 0);
+      
+      objects.forEach(o => scene.remove(o.mesh));
+      objects = [];
+
+      document.getElementById('inGameScore').innerText = "0";
+      document.getElementById('inGameCoins').innerText = "0";
+
+      menuTopBar.classList.add('hidden');
+      mainMenu.classList.add('hidden');
+      gameHud.classList.remove('hidden');
+      closeModals();
+
+      running = true; paused = false;
+      lastTime = performance.now();
+    }
+
+    function triggerGameOver() {
+      running = false;
+      if(score > bestScore) { bestScore = score; localStorage.setItem('runnerBestScore', bestScore); }
+      totalCoins += currentCoins; localStorage.setItem('runnerTotalCoins', totalCoins);
+      
+      document.getElementById('goScore').innerText = score;
+      document.getElementById('goCoins').innerText = currentCoins;
+      document.getElementById('reviveBtn').style.display = isRevived ? 'none' : 'flex';
+      
+      showModal('gameOverModal');
+      updateMenuStats();
+    }
+
+    // Main Game Engine Loop
+    function animate(currentTime) {
+      requestAnimationFrame(animate);
+      const delta = Math.min(0.05, (currentTime - lastTime) / 1000);
+      lastTime = currentTime;
+
+      // Road animation continues even in menu for premium feel
+      road.position.z += (running && !paused ? speed : 10) * delta;
+      if(road.position.z > 0) road.position.z = -50;
+
+      if (!running || paused) return;
+
+      // Update Character Animation
+      if (mixer) mixer.update(delta);
+
+      speed = Math.min(80, speed + delta * 0.5);
+      score += Math.floor(speed * delta * 0.5);
+      document.getElementById('inGameScore').innerText = score;
+      if(invincibilityTimer > 0) invincibilityTimer -= delta;
+
+      // Player Movement Logic
+      if (playerModel) {
+        playerModel.position.x += (playerLane * laneWidth - playerModel.position.x) * delta * 15;
+        
+        // Backup Bobbing (If model has no animations)
+        if(!mixer && jumpHeight <= 0) {
+           playerModel.position.y = Math.abs(Math.sin(currentTime * 0.015)) * 0.2; 
+        }
+
+        // Jump Logic
+        if (jumpVelocity !== 0 || jumpHeight > 0) {
+          jumpHeight += jumpVelocity * delta;
+          jumpVelocity -= 40 * delta; 
+          if (jumpHeight <= 0) { jumpHeight = 0; jumpVelocity = 0; }
+          playerModel.position.y = jumpHeight;
+        }
+
+        // Invincibility Blink
+        playerModel.visible = invincibilityTimer > 0 ? (Math.floor(currentTime / 100) % 2 === 0) : true;
+      }
+
+      // Spawning Objects
+      spawnTimer -= delta;
+      if (spawnTimer <= 0) { spawnObject(); spawnTimer = Math.max(0.4, 1.2 - speed/100); }
+
+      // PERFECT COLLISION DETECTION (Manual Hitbox)
+      const pX = playerModel.position.x;
+      const pY = playerModel.position.y;
+      const pZ = playerModel.position.z;
+      // Define a strict, tight manual bounding box for the player (ignores big invisible model parts)
+      const playerBox = new THREE.Box3(
+        new THREE.Vector3(pX - 0.5, pY, pZ - 0.5),
+        new THREE.Vector3(pX + 0.5, pY + 1.8, pZ + 0.5)
+      );
+
+      for (let i = objects.length - 1; i >= 0; i--) {
+        let o = objects[i];
+        if (o.removed) continue;
+
+        o.mesh.position.z += speed * delta;
+        if (o.type === 'coin') o.mesh.rotation.y += delta * 5;
+
+        const objBox = new THREE.Box3().setFromObject(o.mesh);
+        
+        if (playerBox.intersectsBox(objBox)) {
+          if (o.type === 'coin') {
+            currentCoins++; document.getElementById('inGameCoins').innerText = currentCoins;
+            scene.remove(o.mesh); o.removed = true;
+          } else if (invincibilityTimer <= 0) {
+            triggerGameOver(); // Hit Barrier!
+          }
+        }
+        if (o.mesh.position.z > 10) { scene.remove(o.mesh); o.removed = true; }
+      }
+      objects = objects.filter(o => !o.removed);
+
+      renderer.render(scene, camera);
+    }
+    
+    // Start Render Loop
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+
+    // Setup UI Button Actions
+    document.getElementById('playBtn').addEventListener('click', startGame);
+    document.getElementById('restartBtn').addEventListener('click', startGame);
+    document.getElementById('pauseBtn').addEventListener('click', () => { paused = true; showModal('pauseModal'); });
+    document.getElementById('resumeBtn').addEventListener('click', () => { paused = false; closeModals(); });
+    
+    document.getElementById('goHomeBtn').addEv
