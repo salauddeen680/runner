@@ -10,7 +10,7 @@ on:
       - "package.json"
       - "capacitor.config.json"
       - ".github/workflows/build-android.yml"
-      - "www/runner-cover.png"
+      - "www/icon.png"
 
 permissions:
   contents: read
@@ -113,8 +113,8 @@ jobs:
           tree.write(path, encoding="utf-8", xml_declaration=True)
           print("Portrait orientation applied successfully.")
 
-          # Setup Launcher Icons using runner-cover.png
-          cover_path = "www/runner-cover.png"
+          # Setup Launcher Icons using icon.png
+          cover_path = "www/icon.png"
           if os.path.exists(cover_path):
               img = Image.open(cover_path).convert("RGBA")
               
@@ -135,7 +135,7 @@ jobs:
                   resized_img.save(os.path.join(target_folder, "ic_launcher_round.png"), "PNG")
               print("App icons generated and applied successfully.")
           else:
-              print("Warning: www/runner-cover.png not found, skipping icon generation.")
+              print("Warning: www/icon.png not found, skipping icon generation.")
           PY
 
           grep -n "screenOrientation" "$MANIFEST"
